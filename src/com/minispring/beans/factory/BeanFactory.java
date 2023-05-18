@@ -12,4 +12,5 @@ import com.minispring.beans.factory.config.BeanDefinition;
 public interface BeanFactory {
     Object getBean(String beanName) throws BeansException;
     void registerBeanDefinition(BeanDefinition beanDefinition);
+    void registerBean(String beanName, Object obj);
 }
