@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapper namespace="com.test.service.UserServiceV2">
+    <select id="getUserInfo" parameterType="java.lang.Integer" resultType="com.test.service.entity.User">
+        select * from t_user where user_id=?
+    </select>
+</mapper>

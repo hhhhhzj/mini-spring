@@ -2,6 +2,9 @@ package com.test.service;
 
 import com.minispring.beans.BeansException;
 import com.minispring.context.ClassPathXmlApplicationContext;
+import com.test.service.entity.User;
+
+import java.util.List;
 
 /**
  * description
@@ -16,6 +19,18 @@ public class Test1 {
                 ClassPathXmlApplicationContext("applicationContext.xml");
         AService aService = (AService) ctx.getBean("aservice");
         aService.sayHello();
+
+//        {
+//            UserService userService = (UserService) ctx.getBean("userService");
+//            List<User> userList = userService.getUserInfo(1);
+//            System.out.println(userList.toString());
+//        }
+
+        {
+            UserServiceV2 userService = (UserServiceV2) ctx.getBean("userServiceV2");
+           User user = userService.getUserInfo(1);
+            System.out.println(user.toString());
+        }
     }
 }
 

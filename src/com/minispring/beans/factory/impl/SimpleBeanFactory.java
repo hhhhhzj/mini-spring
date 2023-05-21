@@ -72,6 +72,7 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
             if (propertyValues != null && propertyValues.getPropertyValueList() != null) {
                 for (PropertyValue propertyValue : propertyValues.getPropertyValueList()) {
                     String pType = propertyValue.getType();
+                    String ref = propertyValue.getRef();
                     String pName = propertyValue.getName();
                     String pValue = (String) propertyValue.getValue();
 
@@ -93,7 +94,11 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
                         case "int":
                             paramTypes[0] = int.class;
                             paramValues[0] = Integer.parseInt(pValue);
-                        default:
+                        default:   //对象类型
+                            if (ref != null) {
+                                paramValues[0] = getBean(ref);
+                                paramTypes[0] = paramValues[0].getClass();
+                            }
                             break;
                     }
 

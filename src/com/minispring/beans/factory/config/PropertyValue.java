@@ -9,6 +9,7 @@ public class PropertyValue {
     private String type;
     private final String name;
     private final Object value;
+    private String ref;
 
     public PropertyValue(String name, Object value) {
         this.name = name;
@@ -19,6 +20,13 @@ public class PropertyValue {
         this.type = type;
         this.name = name;
         this.value = value;
+    }
+
+    public PropertyValue(String type ,String name, Object value, String ref) {
+        this.type = type;
+        this.name = name;
+        this.value = value;
+        this.ref = ref;
     }
 
 
@@ -36,5 +44,9 @@ public class PropertyValue {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getRef() {
+        return ref;
     }
 }

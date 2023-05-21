@@ -15,7 +15,7 @@ public class AServiceImpl implements AService {
 
 	@Override
 	public void sayHello() {
-		System.out.print("hello world" + property1 + property2);
+		System.out.println(property1 + " " + property2);
 	}
 
 	public String getProperty1() {

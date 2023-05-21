@@ -18,7 +18,7 @@ import com.minispring.core.Resource;
  */
 public class ClassPathXmlApplicationContext {
 
-    private BeanFactory beanFactory;
+    private final BeanFactory beanFactory;
 
     public ClassPathXmlApplicationContext(String fileName) {
         beanFactory = new SimpleBeanFactory();

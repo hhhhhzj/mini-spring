@@ -6,4 +6,26 @@
         <property type="String" name="property1" value="Someone says"/>
         <property type="String" name="property2" value="Hello World!"/>
     </bean>
+    <bean id="dataSource" class="com.minispring.jdbc.datasource.PoolDataSource">
+        <property type="String" name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property type="String" name="url" value="jdbc:mysql://localhost:3306/sampledb"/>
+        <property type="String" name="username" value="hzj"/>
+        <property type="String" name="password" value="123456"/>
+        <property type="int" name="initialSize" value="3"/>
+    </bean>
+    <bean id="jdbcTemplate" class="com.minispring.jdbc.core.JdbcTemplate" >
+        <property type=" com.minispring.jdbc.datasource.PoolDataSource" name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean id ="userService" class = "com.test.service.UserService">
+        <property type="com.minispring.jdbc.core.JdbcTemplate" name="jdbcTemplate" ref="jdbcTemplate"/>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="com.minispring.batis.DefaultSqlSessionFactory" >
+        <property type="com.minispring.jdbc.core.JdbcTemplate" name="jdbcTemplate" ref="jdbcTemplate"/>
+        <property type="String" name="mapperLocations" value="mapper"/>
+    </bean>
+
+    <bean id ="userServiceV2" class = "com.test.service.UserServiceV2">
+        <property type="com.minispring.batis.DefaultSqlSessionFactory" name="sqlSessionFactory" ref="sqlSessionFactory"/>
+    </bean>
 </beans>

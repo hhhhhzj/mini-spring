@@ -34,7 +34,8 @@ public class XmlBeanDefinitionReader {
                     String pType = propertyElement.attributeValue("type");
                     String pName = propertyElement.attributeValue("name");
                     String pValue = propertyElement.attributeValue("value");
-                    beanDefinition.addPropertyValue(new PropertyValue(pType, pName, pValue));
+                    String ref = propertyElement.attributeValue("ref");
+                    beanDefinition.addPropertyValue(new PropertyValue(pType, pName, pValue, ref));
                 }
             }
 
