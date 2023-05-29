@@ -1,5 +1,6 @@
 package com.minispring.beans.factory.impl;
 
+import com.minispring.beans.BeansException;
 import com.minispring.beans.factory.BeanFactory;
 import com.minispring.beans.factory.config.*;
 
@@ -15,19 +16,57 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author zhijian05.huang
  * @date 2023-05-12 20:58
  */
-public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory {
+public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory {
 
     private Map<String, BeanDefinition> beanDefinitions = new ConcurrentHashMap<>(256);
-    public SimpleBeanFactory() {}
+    protected Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>(256);
+
+    public abstract Object applyBeanPostProcessorBeforeInitialization(Object existingBean, String beanName) throws BeansException;
+    public abstract Object applyBeanPostProcessorAfterInitialization(Object existingBean, String beanName) throws BeansException;
+
+    public AbstractBeanFactory() {}
 
     @Override
-    public Object getBean(String beanName) {
+    public Object getBean(String beanName) throws BeansException {
         Object singleton = getSingleton(beanName);
         if (singleton != null) {
             return singleton;
         }
+        singleton = this.earlySingletonObjects.get(beanName);
+        if (singleton == null) {
+            singleton = createBean(beanName);
+            registerBean(beanName, singleton);
+            // 预留beanpostprocessor位置
+            applyBeanPostProcessorBeforeInitialization(singleton, beanName);
+            // step 2: afterPropertiesSet
+            // step 3: init-method
+            applyBeanPostProcessorAfterInitialization(singleton, beanName);
+        }
 
+        return singleton;
+    }
+
+    @Override
+    public void refresh() {
+        for (String beanName : beanDefinitions.keySet()) {
+            try {
+                getBean(beanName);
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+
+    private Object createBean(String beanName) {
         BeanDefinition beanDefinition = beanDefinitions.get(beanName);
+        Object singleton = doCreateBean(beanDefinition);
+        this.earlySingletonObjects.put(beanName, singleton);
+        handleProperties(beanDefinition, singleton);
+        return singleton;
+    }
+
+    private Object doCreateBean(BeanDefinition beanDefinition) {
+        Object singleton = null;
         try {
             Class<?> clz = Class.forName(beanDefinition.getClassName());
 
@@ -57,7 +96,7 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
                             paramTypes[i] = int.class;
                             paramValues[i] = Integer.parseInt((String) argumentValue.getValue());
                         default:
-                           break;
+                            break;
                     }
                 }
 
@@ -67,6 +106,34 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
             } else {
                 singleton = clz.newInstance();
             }
+        } catch (Exception e) {
+
+        }
+        return singleton;
+
+    }
+
+    @Override
+    public void registerBeanDefinition(BeanDefinition beanDefinition) {
+        this.beanDefinitions.put(beanDefinition.getId(), beanDefinition);
+        if (!beanDefinition.isLazyInit()) {
+            try {
+                getBean(beanDefinition.getId());
+            } catch (Exception ignored) {
+
+            }
+        }
+
+    }
+
+    @Override
+    public void registerBean(String beanName, Object obj) {
+        this.registerSingleton(beanName, obj);
+    }
+
+    private void handleProperties(BeanDefinition beanDefinition, Object singleton) {
+        try {
+            Class<?> clz = Class.forName(beanDefinition.getClassName());
 
             PropertyValues propertyValues = beanDefinition.getPropertyValues();
             if (propertyValues != null && propertyValues.getPropertyValueList() != null) {
@@ -112,29 +179,10 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
                 }
             }
 
-            registerBean(beanName, singleton);
+
         } catch (Exception e) {
 
         }
-        return singleton;
-    }
-
-    @Override
-    public void registerBeanDefinition(BeanDefinition beanDefinition) {
-        this.beanDefinitions.put(beanDefinition.getId(), beanDefinition);
-        if (!beanDefinition.isLazyInit()) {
-            try {
-                getBean(beanDefinition.getId());
-            } catch (Exception ignored) {
-
-            }
-        }
-
-    }
-
-    @Override
-    public void registerBean(String beanName, Object obj) {
-        this.registerSingleton(beanName, obj);
     }
 }
 

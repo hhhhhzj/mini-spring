@@ -1,11 +1,16 @@
 package com.test.service;
 
+import com.minispring.core.Autowired;
+
 public class AServiceImpl implements AService {
 
 	private String name;
 	private int level;
 	private String property1;
 	private String property2;
+
+	@Autowired
+	private BaseService baseService;
 
 	public AServiceImpl(String name, int level) {
 		this.name = name;
@@ -16,6 +21,12 @@ public class AServiceImpl implements AService {
 	@Override
 	public void sayHello() {
 		System.out.println(property1 + " " + property2);
+	}
+
+	public void baseSayHello() {
+		if (baseService != null) {
+			baseService.sayHello();
+		}
 	}
 
 	public String getProperty1() {
@@ -48,5 +59,13 @@ public class AServiceImpl implements AService {
 
 	public void setProperty2(String property2) {
 		this.property2 = property2;
+	}
+
+	public BaseService getBaseService() {
+		return baseService;
+	}
+
+	public void setBaseService(BaseService baseService) {
+		this.baseService = baseService;
 	}
 }

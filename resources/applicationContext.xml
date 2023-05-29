@@ -28,4 +28,6 @@
     <bean id ="userServiceV2" class = "com.test.service.UserServiceV2">
         <property type="com.minispring.batis.DefaultSqlSessionFactory" name="sqlSessionFactory" ref="sqlSessionFactory"/>
     </bean>
+
+    <bean id="baseService" class="com.test.service.BaseService"></bean>
 </beans>

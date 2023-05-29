@@ -24,7 +24,9 @@ public class BeanDefinition {
 
     private String scope = SCOPE_SINGLETON;
 
-    private boolean lazyInit = false;
+    private String initMethodName;
+
+    private boolean lazyInit = true;
 
     public BeanDefinition(String id, String className) {
         this.id = id;
@@ -94,5 +96,13 @@ public class BeanDefinition {
 
     public void setLazyInit(boolean lazyInit) {
         this.lazyInit = lazyInit;
+    }
+
+    public String getInitMethodName() {
+        return initMethodName;
+    }
+
+    public void setInitMethodName(String initMethodName) {
+        this.initMethodName = initMethodName;
     }
 }
