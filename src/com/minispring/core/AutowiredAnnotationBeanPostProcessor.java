@@ -1,7 +1,8 @@
 package com.minispring.core;
 
 import com.minispring.beans.BeansException;
-import com.minispring.beans.factory.impl.AutowireCapableBeanFactory;
+import com.minispring.beans.factory.BeanFactory;
+import com.minispring.beans.factory.impl.AbstractAutowireCapableBeanFactory;
 
 import java.lang.reflect.Field;
 
@@ -12,7 +13,7 @@ import java.lang.reflect.Field;
 
 public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
 
-    private AutowireCapableBeanFactory beanFactory;
+    private BeanFactory beanFactory;
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName)
@@ -48,10 +49,10 @@ public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
             throws BeansException {
         return null;
     }
-    public AutowireCapableBeanFactory getBeanFactory() {
+    public BeanFactory getBeanFactory() {
         return beanFactory;
     }
-    public void setBeanFactory(AutowireCapableBeanFactory beanFactory) {
+    public void setBeanFactory(BeanFactory beanFactory) {
         this.beanFactory = beanFactory;
     }
 }

@@ -2,6 +2,8 @@ package com.minispring.beans.factory.impl;
 
 import com.minispring.beans.BeansException;
 import com.minispring.beans.factory.BeanFactory;
+import com.minispring.beans.factory.ConfigurableBeanFactory;
+import com.minispring.beans.factory.SingletonBeanRegistry;
 import com.minispring.beans.factory.config.*;
 
 import java.lang.reflect.Constructor;
@@ -16,9 +18,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author zhijian05.huang
  * @date 2023-05-12 20:58
  */
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory {
+public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory {
 
-    private Map<String, BeanDefinition> beanDefinitions = new ConcurrentHashMap<>(256);
+    protected Map<String, BeanDefinition> beanDefinitions = new ConcurrentHashMap<>(256);
     protected Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>(256);
 
     public abstract Object applyBeanPostProcessorBeforeInitialization(Object existingBean, String beanName) throws BeansException;
@@ -129,6 +131,26 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     @Override
     public void registerBean(String beanName, Object obj) {
         this.registerSingleton(beanName, obj);
+    }
+
+    @Override
+    public void registerDependentBean(String beanName, String dependentBeanName) {
+        super.registerDependentBean(beanName, dependentBeanName);
+    }
+
+    @Override
+    public boolean hasDependentBean(String beanName) {
+        return super.hasDependentBean(beanName);
+    }
+
+    @Override
+    public String[] getDependentBeans(String beanName) {
+        return super.getDependentBeans(beanName);
+    }
+
+    @Override
+    public String[] getDependenciesForBean(String beanName) {
+        return super.getDependenciesForBean(beanName);
     }
 
     private void handleProperties(BeanDefinition beanDefinition, Object singleton) {

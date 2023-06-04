@@ -1,6 +1,7 @@
 package com.minispring.core;
 
 import com.minispring.beans.BeansException;
+import com.minispring.beans.factory.BeanFactory;
 
 /**
  * @author Zhijian.H
@@ -27,4 +28,6 @@ public interface BeanPostProcessor {
      * @throws BeansException
      */
     Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException;
+
+    void setBeanFactory(BeanFactory beanFactory);
 }

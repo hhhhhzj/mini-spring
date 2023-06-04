@@ -24,9 +24,11 @@ public class AServiceImpl implements AService {
 	}
 
 	public void baseSayHello() {
-		if (baseService != null) {
-			baseService.sayHello();
+		if (baseService == null) {
+			System.out.println("baseService 为null");
 		}
+		baseService.sayHello();
+
 	}
 
 	public String getProperty1() {
