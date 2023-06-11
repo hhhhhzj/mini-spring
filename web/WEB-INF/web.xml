@@ -3,6 +3,19 @@
          xmlns:web="http://xmlns.jcp.org/xml/ns/javaee"
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
 http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID">
+
+    <display-name></display-name>
+    <description></description>
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>applicationContext.xml</param-value>
+    </context-param>
+    <listener>
+        <listener-class>com.minispring.web.ContextLoaderListener</listener-class>
+    </listener>
+<!--    <filter></filter>-->
+<!--    <filter-mapping></filter-mapping>-->
+
     <servlet>
         <servlet-name>minisMVC</servlet-name>
         <servlet-class>com.minispring.web.DispatcherServlet</servlet-class>

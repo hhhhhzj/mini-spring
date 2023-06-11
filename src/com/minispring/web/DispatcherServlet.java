@@ -1,16 +1,23 @@
 package com.minispring.web;
 
-import com.minispring.core.Resource;
+import com.minispring.beans.BeansException;
+import com.minispring.core.Autowired;
+import lombok.SneakyThrows;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,17 +28,37 @@ import java.util.Map;
  */
 public class DispatcherServlet extends HttpServlet {
 
+    private String sContextConfigLocation;
+
+    private List<String> packageNames = new ArrayList<>();
+
+    private List<String> controllerNames = new ArrayList<>();
+    private Map<String,Object> controllerObjs = new HashMap<>();
+    private Map<String,Class<?>> controllerClasses = new HashMap<>();
+
+    private List<String> urlMappingNames = new ArrayList<>();
 
     private Map<String, MappingValue> mappingValues;
-    private String sContextConfigLocation;
+
+    //Map<url, controller.class>
     private Map<String, Class<?>> mappingClz = new HashMap<>();
+    //Map<url, controller>>
     private Map<String, Object> mappingObjs = new HashMap<>();
+    //Map<url, method>>
+    private Map<String,Method> mappingMethods = new HashMap<>();
+
+    private WebApplicationContext parentApplicationContext;
+
+    private WebApplicationContext webApplicationContext;
+
+    private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
 
+    @lombok.SneakyThrows
     @Override
-    public void init(ServletConfig config) throws ServletException {
+    public void init(ServletConfig config) {
         super.init(config);
-
+        this.parentApplicationContext = (WebApplicationContext) this.getServletContext().getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
         sContextConfigLocation = config.getInitParameter("contextConfigLocation");
         URL xmlPath = null;
         try {
@@ -39,16 +66,21 @@ public class DispatcherServlet extends HttpServlet {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        Resource rs = new ClassPathXmlResource(xmlPath);
-        XmlConfigReader reader = new XmlConfigReader();
-        mappingValues = reader.loadConfig(rs);
-        Refresh();
+
+        this.packageNames = XmlScanComponentHelper.getNodeValue(xmlPath);
+
+        refresh();
     }
 
     @Override
     public ServletConfig getServletConfig() {
         return super.getServletConfig();
     }
+
+    protected void refresh() throws BeansException {
+        this.requestMappingHandlerMapping = new RequestMappingHandlerMapping(packageNames, parentApplicationContext);
+    }
+
 
 
     //对所有的mappingValues中注册的类进行实例化，默认构造函数
@@ -72,6 +104,7 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws ServletException, IOException {
         System.out.println("service");
+        super.service(servletRequest, servletResponse);
     }
 
     @Override
@@ -86,23 +119,15 @@ public class DispatcherServlet extends HttpServlet {
 
 
 
+    @SneakyThrows
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String sPath = request.getServletPath(); //获取请求的path
-        if (this.mappingValues.get(sPath) == null) {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)  {
+        HandlerMethod handlerMethod = requestMappingHandlerMapping.getHandler(request);
+        if (handlerMethod == null) {
+            response.getWriter().append("no url map");
             return;
         }
-
-        Class<?> clz = this.mappingClz.get(sPath); //获取bean类定义
-        Object obj = this.mappingObjs.get(sPath);  //获取bean实例
-        String methodName = this.mappingValues.get(sPath).getMethod(); //获取调用方法名
-        Object objResult = null;
-        try {
-            Method method = clz.getMethod(methodName);
-            objResult = method.invoke(obj); //方法调用
-        } catch (Exception ignored) {
-        }
-        //将方法返回值写入response
-        response.getWriter().append(objResult.toString());
+        HandlerAdapter ha = new RequestMappingHandlerAdapter();
+        ha.handle(request, response, handlerMethod);
     }
 }
