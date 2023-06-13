@@ -15,7 +15,7 @@
         <property type="int" name="initialSize" value="3"/>
     </bean>
     <bean id="jdbcTemplate" class="com.minispring.jdbc.core.JdbcTemplate" >
-        <property type=" com.minispring.jdbc.datasource.PoolDataSource" name="dataSource" ref="dataSource"/>
+        <property type="com.minispring.jdbc.datasource.PoolDataSource" name="dataSource" ref="dataSource"/>
     </bean>
     <bean id ="userService" class = "com.test.service.UserService">
         <property type="com.minispring.jdbc.core.JdbcTemplate" name="jdbcTemplate" ref="jdbcTemplate"/>
@@ -31,4 +31,8 @@
     </bean>
 
     <bean id="baseService" class="com.test.service.BaseService"></bean>
+    <bean id="realaction" class="com.test.service.Action1"></bean>
+    <bean id = "action" class="com.minispring.aop.ProxyFactoryBean">
+        <property type="java.lang.Object" name="target" ref="realaction"></property>
+    </bean>
 </beans>

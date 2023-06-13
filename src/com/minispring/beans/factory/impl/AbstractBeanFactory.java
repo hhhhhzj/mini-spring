@@ -3,6 +3,7 @@ package com.minispring.beans.factory.impl;
 import com.minispring.beans.BeansException;
 import com.minispring.beans.factory.BeanFactory;
 import com.minispring.beans.factory.ConfigurableBeanFactory;
+import com.minispring.beans.factory.FactoryBean;
 import com.minispring.beans.factory.SingletonBeanRegistry;
 import com.minispring.beans.factory.config.*;
 
@@ -18,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author zhijian05.huang
  * @date 2023-05-12 20:58
  */
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory {
+public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport implements ConfigurableBeanFactory {
 
     protected Map<String, BeanDefinition> beanDefinitions = new ConcurrentHashMap<>(256);
     protected Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>(256);
@@ -31,22 +32,39 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     @Override
     public Object getBean(String beanName) throws BeansException {
         Object singleton = getSingleton(beanName);
-        if (singleton != null) {
-            return singleton;
-        }
-        singleton = this.earlySingletonObjects.get(beanName);
         if (singleton == null) {
-            singleton = createBean(beanName);
-            registerBean(beanName, singleton);
-            // 预留beanpostprocessor位置
-            applyBeanPostProcessorBeforeInitialization(singleton, beanName);
-            // step 2: afterPropertiesSet
-            // step 3: init-method
-            applyBeanPostProcessorAfterInitialization(singleton, beanName);
+            singleton = this.earlySingletonObjects.get(beanName);
+            if (singleton == null) {
+                singleton = createBean(beanName);
+                registerBean(beanName, singleton);
+                // 预留beanpostprocessor位置
+                applyBeanPostProcessorBeforeInitialization(singleton, beanName);
+                // step 2: afterPropertiesSet
+                // step 3: init-method
+                applyBeanPostProcessorAfterInitialization(singleton, beanName);
+            }
+        }
+
+        //处理factorybean
+        if (singleton instanceof FactoryBean) {
+            return this.getObjectForBeanInstance(singleton, beanName);
         }
 
         return singleton;
     }
+
+
+    protected Object getObjectForBeanInstance(Object beanInstance, String beanName) {
+        // Now we have the bean instance, which may be a normal bean or a FactoryBean.
+        if (!(beanInstance instanceof FactoryBean)) {
+            return beanInstance;
+        }
+        Object object = null;
+        FactoryBean<?> factory = (FactoryBean<?>) beanInstance;
+        object = getObjectFromFactoryBean(factory, beanName);
+        return object;
+    }
+
 
     @Override
     public void refresh() {
@@ -153,6 +171,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         return super.getDependenciesForBean(beanName);
     }
 
+
     private void handleProperties(BeanDefinition beanDefinition, Object singleton) {
         try {
             Class<?> clz = Class.forName(beanDefinition.getClassName());
@@ -186,7 +205,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                         default:   //对象类型
                             if (ref != null) {
                                 paramValues[0] = getBean(ref);
-                                paramTypes[0] = paramValues[0].getClass();
+                                paramTypes[0] = Class.forName(pType);
                             }
                             break;
                     }
