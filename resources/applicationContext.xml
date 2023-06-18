@@ -32,7 +32,14 @@
 
     <bean id="baseService" class="com.test.service.BaseService"></bean>
     <bean id="realaction" class="com.test.service.Action1"></bean>
+    <bean id = "tracingInterceptor" class="com.test.service.TracingInterceptor"></bean>
+    <bean id="myBeforeAdvice" class="com.test.service.MyBeforeAdvice" />
+    <bean id="advisor" class="com.minispring.aop.NameMatchMethodPointcutAdvisor">
+        <property type="com.minispring.aop.Advice" name="advice" ref="myBeforeAdvice"/>
+        <property type="String" name="mappedName" value="do*"/>
+    </bean>
     <bean id = "action" class="com.minispring.aop.ProxyFactoryBean">
         <property type="java.lang.Object" name="target" ref="realaction"></property>
+        <property type="String" name = "interceptorName" value = "advisor"></property>
     </bean>
 </beans>

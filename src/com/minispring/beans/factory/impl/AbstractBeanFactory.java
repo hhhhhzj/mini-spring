@@ -1,10 +1,7 @@
 package com.minispring.beans.factory.impl;
 
 import com.minispring.beans.BeansException;
-import com.minispring.beans.factory.BeanFactory;
-import com.minispring.beans.factory.ConfigurableBeanFactory;
-import com.minispring.beans.factory.FactoryBean;
-import com.minispring.beans.factory.SingletonBeanRegistry;
+import com.minispring.beans.factory.*;
 import com.minispring.beans.factory.config.*;
 
 import java.lang.reflect.Constructor;
@@ -37,6 +34,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
             if (singleton == null) {
                 singleton = createBean(beanName);
                 registerBean(beanName, singleton);
+                if (singleton instanceof BeanFactoryAware) {
+                    ((BeanFactoryAware) singleton).setBeanFactory(this);
+                }
                 // 预留beanpostprocessor位置
                 applyBeanPostProcessorBeforeInitialization(singleton, beanName);
                 // step 2: afterPropertiesSet
