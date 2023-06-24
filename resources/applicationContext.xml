@@ -7,6 +7,7 @@
         <property type="String" name="property2" value="Hello World!"/>
     </bean>
     <bean id="autowiredAnnotationBeanPostProcessor" class="com.minispring.core.AutowiredAnnotationBeanPostProcessor" />
+
     <bean id="dataSource" class="com.minispring.jdbc.datasource.PoolDataSource">
         <property type="String" name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
         <property type="String" name="url" value="jdbc:mysql://localhost:3306/sampledb"/>
@@ -30,16 +31,21 @@
         <property type="com.minispring.batis.DefaultSqlSessionFactory" name="sqlSessionFactory" ref="sqlSessionFactory"/>
     </bean>
 
-    <bean id="baseService" class="com.test.service.BaseService"></bean>
-    <bean id="realaction" class="com.test.service.Action1"></bean>
-    <bean id = "tracingInterceptor" class="com.test.service.TracingInterceptor"></bean>
+    <bean id="realaction" class="com.test.service.Action1" />
+    <bean id="baseService" class="com.test.service.BaseService" />
+
+    <bean id = "tracingInterceptor" class="com.test.service.TracingInterceptor" />
     <bean id="myBeforeAdvice" class="com.test.service.MyBeforeAdvice" />
     <bean id="advisor" class="com.minispring.aop.NameMatchMethodPointcutAdvisor">
         <property type="com.minispring.aop.Advice" name="advice" ref="myBeforeAdvice"/>
         <property type="String" name="mappedName" value="do*"/>
     </bean>
-    <bean id = "action" class="com.minispring.aop.ProxyFactoryBean">
-        <property type="java.lang.Object" name="target" ref="realaction"></property>
-        <property type="String" name = "interceptorName" value = "advisor"></property>
+<!--    <bean id = "action" class="com.minispring.aop.ProxyFactoryBean">-->
+<!--        <property type="java.lang.Object" name="target" ref="realaction"></property>-->
+<!--        <property type="String" name = "interceptorName" value = "advisor"></property>-->
+<!--    </bean>-->
+    <bean id="beanNameAutoProxyCreator" class="com.minispring.aop.framework.BeanNameAutoProxyCreator">
+        <property type="String" name="pattern" value="real*" />
+        <property type="String" name = "interceptorName" value = "advisor" />
     </bean>
 </beans>

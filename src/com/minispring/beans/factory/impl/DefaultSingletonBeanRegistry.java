@@ -70,6 +70,13 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
     }
 
+    public void removeSingleton(String beanName) {
+        synchronized (this.singletons) {
+            this.singletons.remove(beanName);
+            this.beanNames.remove(beanName);
+        }
+    }
+
     public boolean hasDependentBean(String beanName) {
         return this.dependentBeanMap.containsKey(beanName);
     }

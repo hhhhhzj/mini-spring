@@ -48,7 +48,7 @@ public class ProxyFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
     }
 
     @Override
-    public Object getObject() throws Exception {
+    public Object getObject() {
         if (singletonInstance == null) {
             initializeAdvisor();
             singletonInstance = aopProxyFactory.createAopProxy(target, advisor).getProxy();

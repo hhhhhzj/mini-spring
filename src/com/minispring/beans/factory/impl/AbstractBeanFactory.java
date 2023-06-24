@@ -6,6 +6,7 @@ import com.minispring.beans.factory.config.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport implements ConfigurableBeanFactory {
 
     protected Map<String, BeanDefinition> beanDefinitions = new ConcurrentHashMap<>(256);
+    protected List<String> beanDefinitionNames = new ArrayList<>();
     protected Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>(256);
 
     public abstract Object applyBeanPostProcessorBeforeInitialization(Object existingBean, String beanName) throws BeansException;
@@ -37,11 +39,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                 if (singleton instanceof BeanFactoryAware) {
                     ((BeanFactoryAware) singleton).setBeanFactory(this);
                 }
+
                 // 预留beanpostprocessor位置
-                applyBeanPostProcessorBeforeInitialization(singleton, beanName);
+                singleton = applyBeanPostProcessorBeforeInitialization(singleton, beanName);
                 // step 2: afterPropertiesSet
                 // step 3: init-method
                 applyBeanPostProcessorAfterInitialization(singleton, beanName);
+                this.removeSingleton(beanName);
+                this.registerBean(beanName, singleton);
+                System.out.println(singleton);
             }
         }
 
@@ -135,6 +141,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
     @Override
     public void registerBeanDefinition(BeanDefinition beanDefinition) {
+        beanDefinitionNames.add(beanDefinition.getId());
         this.beanDefinitions.put(beanDefinition.getId(), beanDefinition);
         if (!beanDefinition.isLazyInit()) {
             try {
@@ -170,7 +177,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     public String[] getDependenciesForBean(String beanName) {
         return super.getDependenciesForBean(beanName);
     }
-
 
     private void handleProperties(BeanDefinition beanDefinition, Object singleton) {
         try {
